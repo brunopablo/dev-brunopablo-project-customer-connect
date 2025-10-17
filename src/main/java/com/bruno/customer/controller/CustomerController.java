@@ -1,5 +1,7 @@
 package com.bruno.customer.controller;
 
+import java.net.URI;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +34,7 @@ public class CustomerController {
 
         var customerId = customerService.createCustomer(createOrUpdateCustomerRequest);
 
-        return ResponseEntity.ok(customerId);
+        return ResponseEntity.created(URI.create("/customers/" + customerId)).build();
     }
 
     @DeleteMapping("/{customerId}")
@@ -58,8 +60,8 @@ public class CustomerController {
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
             @RequestParam(name = "orderBy", defaultValue = "desc") String orderBy,
-            @RequestParam(name = "custumerEmail", required = false) String customerEmail,
-            @RequestParam(name = "custumerCpf", required = false) Long customerCpf) {
+            @RequestParam(name = "customerEmail", required = false) String customerEmail,
+            @RequestParam(name = "customerCpf", required = false) String customerCpf) {
 
         var apiResponse = customerService.findAllCustomers(
                 page,

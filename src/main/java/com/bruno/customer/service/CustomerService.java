@@ -1,6 +1,5 @@
 package com.bruno.customer.service;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.springframework.data.domain.Page;
@@ -28,12 +27,12 @@ public class CustomerService {
 
     public Long createCustomer(CreateOrUpdateCustomerRequest createOrUpdateClientRequest) {
 
-        if (customerRepository.existsByCustomerCpf(createOrUpdateClientRequest.cpf())) {
+        if (customerRepository.existsByCpf(createOrUpdateClientRequest.cpf())) {
             System.out.println("CPF JA EXISTE!");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF is registered!");
         }
 
-        if (customerRepository.existsByCustomerEmail(createOrUpdateClientRequest.email())) {
+        if (customerRepository.existsByEmail(createOrUpdateClientRequest.email())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "EMAIL is registered!");
         }
 
@@ -43,12 +42,12 @@ public class CustomerService {
                 createOrUpdateClientRequest.cpf(),
                 createOrUpdateClientRequest.email(),
                 createOrUpdateClientRequest.phone(),
-                LocalDateTime.now(),
+                null,
                 null);
 
         var customerCreated = customerRepository.save(customerEntity);
 
-        return customerCreated.getCustomerId();
+        return customerCreated.getId();
     }
 
     public void deleteCustomer(Long customerId) {
@@ -69,29 +68,30 @@ public class CustomerService {
 
         if ((Objects.nonNull(createOrUpdateCustomerRequest.name())
                 && !createOrUpdateCustomerRequest.name().trim().isEmpty())
-                && !createOrUpdateCustomerRequest.name().trim().equalsIgnoreCase(customerEntity.getCustomerName())) {
+                && !createOrUpdateCustomerRequest.name().trim().equalsIgnoreCase(customerEntity.getName())) {
 
-            customerEntity.setCustomerName(createOrUpdateCustomerRequest.name());
+            customerEntity.setName(createOrUpdateCustomerRequest.name());
         }
 
         if ((Objects.nonNull(createOrUpdateCustomerRequest.email())
                 && !createOrUpdateCustomerRequest.email().trim().isEmpty())
-                && !createOrUpdateCustomerRequest.email().trim().equalsIgnoreCase(customerEntity.getCustomerEmail())) {
+                && !createOrUpdateCustomerRequest.email().trim().equalsIgnoreCase(customerEntity.getEmail())) {
 
-            customerEntity.setCustomerEmail(createOrUpdateCustomerRequest.email());
+            customerEntity.setEmail(createOrUpdateCustomerRequest.email());
         }
 
         if ((Objects.nonNull(createOrUpdateCustomerRequest.phone())
                 && !createOrUpdateCustomerRequest.phone().trim().isEmpty())
-                && !createOrUpdateCustomerRequest.phone().trim().equalsIgnoreCase(customerEntity.getCustomerPhone())) {
+                && !createOrUpdateCustomerRequest.phone().trim().equalsIgnoreCase(customerEntity.getPhone())) {
 
-            customerEntity.setCustomerPhone(createOrUpdateCustomerRequest.phone());
+            customerEntity.setPhone(createOrUpdateCustomerRequest.phone());
         }
 
-        if ((Objects.nonNull(createOrUpdateCustomerRequest.cpf())
-                && !createOrUpdateCustomerRequest.cpf().equals(customerEntity.getCustomerCpf()))) {
+        if (((Objects.nonNull(createOrUpdateCustomerRequest.cpf())
+                && !createOrUpdateCustomerRequest.cpf().trim().isEmpty())
+                && !createOrUpdateCustomerRequest.cpf().equals(customerEntity.getCpf()))) {
 
-            customerEntity.setCustomerCpf(createOrUpdateCustomerRequest.cpf());
+            customerEntity.setCpf(createOrUpdateCustomerRequest.cpf());
         }
 
         customerRepository.save(customerEntity);
@@ -102,7 +102,7 @@ public class CustomerService {
             Integer pageSize,
             String orderBy,
             String customerEmail,
-            Long customerCpf) {
+            String customerCpf) {
 
         var pageRequest = getPageRequest(page, pageSize, orderBy);
 
@@ -118,20 +118,28 @@ public class CustomerService {
 
     }
 
-    private Page<CustomerEntity> getPages(String customerEmail, Long customerCpf, PageRequest pageRequest) {
+    private Page<CustomerEntity> getPages(String customerEmail, String customerCpf, PageRequest pageRequest) {
+
+        System.out.println(customerEmail);
+        System.out.println(customerCpf);
+
         if ((Objects.nonNull(customerEmail) && !customerEmail.trim().isEmpty())
-                && Objects.nonNull(customerCpf)) {
-            return customerRepository.findByCustomerEmailAndCustomerCpf(customerEmail, customerCpf, pageRequest);
+                && (Objects.nonNull(customerCpf) && !customerCpf.trim().isBlank())) {
+            System.out.println("Entrou no primeiro if");
+            return customerRepository.findByCpfAndEmail(customerCpf, customerEmail, pageRequest);
         }
 
         if (Objects.nonNull(customerEmail) && !customerEmail.trim().isEmpty()) {
-            return customerRepository.findByCustomerEmail(customerEmail, pageRequest);
+            System.out.println("Entrou no segundo if");
+            return customerRepository.findByEmail(customerEmail, pageRequest);
         }
-
-        if (Objects.nonNull(customerCpf)) {
-            return customerRepository.findByCustomerCpf(customerCpf, pageRequest);
+        
+        if (Objects.nonNull(customerCpf) && !customerCpf.trim().isBlank()) {
+            System.out.println("Entrou no terceiro if");
+            return customerRepository.findByCpf(customerCpf, pageRequest);
         }
-
+        
+        System.out.println("Entrou em nenhum dos ifs");
         return customerRepository.findAll(pageRequest);
     }
 

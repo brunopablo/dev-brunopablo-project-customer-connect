@@ -8,14 +8,14 @@ import com.bruno.customer.entity.CustomerEntity;
 
 public interface CustomerRepository extends JpaRepository<CustomerEntity, Long> {
 
-    Page<CustomerEntity> findByCustomerEmail(String customerEmail, PageRequest pageRequest);
+    Page<CustomerEntity> findByEmail(String email, PageRequest pageRequest);
 
-    Page<CustomerEntity> findByCustomerCpf(Long customerCpf, PageRequest pageRequest);
+    Page<CustomerEntity> findByCpf(String cpf, PageRequest pageRequest);
 
-    Page<CustomerEntity> findByCustomerEmailAndCustomerCpf(String customerEmail, Long customerCpf,
+    Page<CustomerEntity> findByCpfAndEmail(String email, String cpf,
             PageRequest pageRequest);
 
-    boolean existsByCustomerCpf(Long customerCpf);
+    boolean existsByCpf(String cpf);
 
-    boolean existsByCustomerEmail(String customerEmail);
+    boolean existsByEmail(String email);
 }
