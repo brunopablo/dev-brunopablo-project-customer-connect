@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: postgres_customer
+    environment:
+      POSTGRES_USER: brn
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: customer
+    ports:
+      - "1616:1616"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: ["postgres", "-p", "1616"]
+  
+volumes:
+  pgdata:
